@@ -175,53 +175,6 @@ public class RNSumUpModule extends ReactContextBaseJavaModule {
     @Override
     public void onActivityResult(Activity activity, int requestCode, int resultCode, Intent data) {
       switch (requestCode) {
-        case REQUEST_CODE_LOGIN:
-          if (data != null) {
-            Bundle extra = data.getExtras();
-            if (extra.getInt(SumUpAPI.Response.RESULT_CODE) == REQUEST_CODE_LOGIN) {
-              WritableMap map = Arguments.createMap();
-              map.putBoolean("success", true);
-
-              UserModel userInfo = CoreState.Instance().get(UserModel.class);
-              WritableMap userAdditionalInfo = Arguments.createMap();
-              userAdditionalInfo.putString("merchantCode", userInfo.getBusiness().getMerchantCode());
-              userAdditionalInfo.putString("currencyCode", userInfo.getBusiness().getCountry().getCurrency().getCode());
-              map.putMap("userAdditionalInfo", userAdditionalInfo);
-
-              mSumUpPromise.resolve(map);
-            } else {
-              mSumUpPromise.reject(extra.getString(SumUpAPI.Response.RESULT_CODE), extra.getString(SumUpAPI.Response.MESSAGE));
-            }
-          }
-          break;
-
-        case REQUEST_CODE_PAYMENT:
-          if (data != null) {
-            Bundle extra = data.getExtras();
-            if (mSumUpPromise != null) {
-              if (extra.getInt(SumUpAPI.Response.RESULT_CODE) == TRANSACTION_SUCCESSFUL) {
-                WritableMap map = Arguments.createMap();
-                map.putBoolean("success", true);
-                map.putString("transactionCode", extra.getString(SumUpAPI.Response.TX_CODE));
-
-                TransactionInfo transactionInfo = extra.getParcelable(SumUpAPI.Response.TX_INFO);
-                WritableMap additionalInfo = Arguments.createMap();
-                additionalInfo.putString("cardType", transactionInfo.getCard().getType());
-                additionalInfo.putString("cardLast4Digits", transactionInfo.getCard().getLast4Digits());
-                additionalInfo.putInt("installments", transactionInfo.getInstallments());
-                map.putMap("additionalInfo", additionalInfo);
-
-                mSumUpPromise.resolve(map);
-              }else
-                mSumUpPromise.reject(extra.getString(SumUpAPI.Response.RESULT_CODE), extra.getString(SumUpAPI.Response.MESSAGE));
-            }
-          }
-          break;
-        case REQUEST_CODE_PAYMENT_SETTINGS:
-          WritableMap map = Arguments.createMap();
-          map.putBoolean("success", true);
-          mSumUpPromise.resolve(map);
-          break;
         default:
           break;
       }
